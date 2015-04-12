@@ -11,9 +11,11 @@ import java.util.Random;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -21,6 +23,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -57,12 +60,20 @@ public class ScreenSaver extends Application {
     root.getChildren().add(canvas);
 
     Scene scene = new Scene(root, screenBounds.getWidth(), screenBounds.getHeight());
+    scene.setCursor(Cursor.DISAPPEAR);
 
     scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
       public void handle(KeyEvent ke) {
         if (ke.getCode() == KeyCode.ESCAPE) {
-          primaryStage.close();
+          Platform.exit();
         }
+      }
+    });
+
+    scene.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent event) {
+        Platform.exit();
       }
     });
 
@@ -90,17 +101,17 @@ public class ScreenSaver extends Application {
 //    timer.scheduleAtFixedRate(new TimerTask() {
 //      @Override
 //      public void run() {
-//        paint();
+//        addRandomShape();
 //        for (Shape shape : shapes) {
 //          shape.draw(gc);
 //        }
 //      }
-//    }, 1000, 2000);
+//    }, 1000, 2000); // 1s delay, 2s loop
 
-//    new AnimationTimer() {
+//    new AnimationTimer() { // Does this for every frame (~60fps)
 //      @Override
 //      public void handle(long now) {
-//        paint();
+//        addRandomShape();
 //        for (Shape shape : shapes) {
 //          shape.draw(gc);
 //        }
@@ -111,7 +122,7 @@ public class ScreenSaver extends Application {
         new Timeline(new KeyFrame(Duration.ZERO, new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent actionEvent) {
-            paint();
+            addRandomShape();
             for (Shape shape : shapes) {
               shape.draw(gc);
             }
@@ -125,7 +136,7 @@ public class ScreenSaver extends Application {
     primaryStage.show();
   }
 
-  private void paint() {
+  private void addRandomShape() {
     Random random = new Random();
     Rectangle2D screenBounds = Screen.getPrimary().getBounds();
 

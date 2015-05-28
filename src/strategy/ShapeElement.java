@@ -1,4 +1,4 @@
-package model;
+package strategy;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -8,14 +8,17 @@ import javafx.scene.paint.Color;
  * @version $Id$
  * @since 1.0
  */
-public abstract class Shape {
+public class ShapeElement {
+
+  private DrawBehaviour drawBehaviour;
+
   private final int x;
   private final int y;
   private final int width;
   private final int height;
   private final Color color;
 
-  public Shape(int x, int y, int width, int height, Color color) {
+  public ShapeElement(int x, int y, int width, int height, Color color) {
     this.x = x;
     this.y = y;
     this.width = width;
@@ -23,7 +26,13 @@ public abstract class Shape {
     this.color = color;
   }
 
-  public abstract void draw(GraphicsContext gc);
+  public void drawShapeElement(GraphicsContext gc) {
+    this.drawBehaviour.draw(gc, getX(), getY(), getWidth(), getHeight(), getColor());
+  }
+
+  public void setDrawBehaviour(DrawBehaviour drawBehaviour) {
+    this.drawBehaviour = drawBehaviour;
+  }
 
   public int getX() {
     return this.x;

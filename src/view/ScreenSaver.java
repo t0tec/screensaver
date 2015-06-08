@@ -32,6 +32,7 @@ import model.Circle;
 import model.Hexagon;
 import model.Rectangle;
 import model.Shape;
+import model.ShapeCreationException;
 
 /**
  * @author t0tec (t0tec.olmec@gmail.com)
@@ -101,20 +102,14 @@ public class ScreenSaver extends Application {
 //    timer.scheduleAtFixedRate(new TimerTask() {
 //      @Override
 //      public void run() {
-//        addRandomShape();
-//        for (Shape shape : shapes) {
-//          shape.draw(gc);
-//        }
+//
 //      }
 //    }, 1000, 2000); // 1s delay, 2s loop
 
 //    new AnimationTimer() { // Does this for every frame (~60fps)
 //      @Override
 //      public void handle(long now) {
-//        addRandomShape();
-//        for (Shape shape : shapes) {
-//          shape.draw(gc);
-//        }
+//
 //      }
 //    }.start();
 
@@ -122,10 +117,13 @@ public class ScreenSaver extends Application {
         new Timeline(new KeyFrame(Duration.ZERO, new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent actionEvent) {
-            addRandomShape();
-            for (Shape shape : shapes) {
+            try {
+              Shape shape = createRandomShape();
               shape.draw(gc);
+            } catch (ShapeCreationException e) {
+              throw new IllegalStateException(e);
             }
+
           }
         }), new KeyFrame(Duration.seconds(2))); // loop every 2 seconds
 
@@ -136,7 +134,7 @@ public class ScreenSaver extends Application {
     primaryStage.show();
   }
 
-  private void addRandomShape() {
+  private Shape createRandomShape() throws ShapeCreationException {
     Random random = new Random();
     Rectangle2D screenBounds = Screen.getPrimary().getBounds();
 
@@ -151,20 +149,30 @@ public class ScreenSaver extends Application {
       top = random.nextInt((int) screenBounds.getHeight());
     }
     int type = random.nextInt(shapeList.size());
-    Class<? extends Shape> shape = shapeList.get(type);
+    Class<? extends Shape> shapeType = shapeList.get(type);
     Constructor constructor;
+    Shape shape;
     try {
-      constructor = shape.getConstructor(constructorArgs.get(shape.getName()));
+      constructor = shapeType.getConstructor(constructorArgs.get(shapeType.getName()));
       if (constructor.getParameterTypes().length == 4) {
-        shapes.add((Shape) constructor.newInstance(left, top, width, Color
-            .rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256))));
+
+        shape = (Shape) constructor.newInstance(left, top, width, Color
+            .rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256)));
+
+        shapes.add(shape);
+        return shape;
       } else {
-        shapes.add((Shape) constructor.newInstance(
-            left, top, width, height, Color.rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256))));
+        shape = (Shape) constructor.newInstance(left, top, width, height,
+                                                      Color.rgb(random.nextInt(256),
+                                                                random.nextInt(256),
+                                                                random.nextInt(256)));
+        shapes.add(shape);
+        return shape;
       }
     } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
         | IllegalArgumentException | InvocationTargetException ex) {
-      System.err.printf("Error with creating %s: %s%n", shape.getSimpleName(), ex.getMessage());
+      System.err.printf("Error with creating %s: %s%n", shapeType.getSimpleName(), ex.getMessage());
+      throw new ShapeCreationException("Problem creating shape of type: " + shapeType.getSimpleName() + " - " + ex.getMessage());
     }
   }
 

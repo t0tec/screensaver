@@ -90,10 +90,9 @@ public class ScreenSaverWithStrategyPattern extends Application {
         new Timeline(new KeyFrame(Duration.ZERO, new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent actionEvent) {
-            addRandomShape();
-            for (ShapeElement shape : shapes) {
-              shape.drawShapeElement(gc);
-            }
+            ShapeElement shape = createRandomShape();
+            shapes.add(shape);
+            shape.drawShapeElement(gc);
           }
         }), new KeyFrame(Duration.seconds(2))); // loop every 2 seconds
 
@@ -104,7 +103,7 @@ public class ScreenSaverWithStrategyPattern extends Application {
     primaryStage.show();
   }
 
-  private void addRandomShape() {
+  private ShapeElement createRandomShape() {
     Random random = new Random();
     Rectangle2D screenBounds = Screen.getPrimary().getBounds();
 
@@ -125,7 +124,7 @@ public class ScreenSaverWithStrategyPattern extends Application {
     int drawBehaviourType = random.nextInt(drawBehaviours.size());
     shape.setDrawBehaviour(drawBehaviours.get(drawBehaviourType));
 
-    shapes.add(shape);
+    return shape;
   }
 
   public static void main(String[] args) {
